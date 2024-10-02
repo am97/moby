@@ -116,10 +116,10 @@ func detectIptables() {
 
 	// The --wait flag was added in iptables v1.6.0.
 	// TODO remove this check once we drop support for CentOS/RHEL 7, which uses an older version of iptables
-	if out, err := exec.Command(path, "--wait", "-L", "-n").CombinedOutput(); err != nil {
-		log.G(context.TODO()).WithError(err).Infof("unable to detect if iptables supports xlock: 'iptables --wait -L -n': `%s`", strings.TrimSpace(string(out)))
-	} else {
-		supportsXlock = true
+	if out, err := exec.Command(path, "--help").CombinedOutput(); err != nil {
+		log.G(context.TODO()).WithError(err).Infof("unable to detect if iptables supports xlock: 'iptables --help': `%s`", strings.TrimSpace(string(out)))
+	} else if strings.Contains(string(out), "--wait") {
+			supportsXlock = true
 	}
 
 	path, err = exec.LookPath("ip6tables")
