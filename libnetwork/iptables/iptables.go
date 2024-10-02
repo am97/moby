@@ -181,7 +181,9 @@ func (iptable IPTable) NewChain(name string, table Table) (*ChainInfo, error) {
 	}
 	// Add chain if it doesn't exist
 	if _, err := iptable.Raw("-t", string(table), "-n", "-L", name); err != nil {
-		if output, err := iptable.Raw("-t", string(table), "-N", name); err != nil {
+		// If the chain contains nftables specific rules, the previous command will
+		// return an error even if the chain exists.
+		if output, err := iptable.Raw("-t", string(table), "-N", name); err != nil && !strings.Contains(err.Error(), "Chain already exists") {
 			return nil, err
 		} else if len(output) != 0 {
 			return nil, fmt.Errorf("could not create %s/%s chain: %s", table, name, output)
